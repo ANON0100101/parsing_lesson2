@@ -1,7 +1,7 @@
 import requests
 import csv
 from bs4 import BeautifulSoup as BS
-URL = 'https://svetofor.info/sotovye-telefony-i-aksessuary/vse-smartfony/smartfony-s-podderzhkoy-4g-ru/'
+BASE_URL = 'https://svetofor.info/sotovye-telefony-i-aksessuary/vse-smartfony/smartfony-s-podderzhkoy-4g-ru/'
 
 
 
@@ -17,10 +17,19 @@ def get_data(soup):
     phones = soup.find_all('div',class_='ty-column4')
     list_data=[]
     for phone in phones:
-        title = phone.find('a',class_='product-title').text.strip()
-        img =phone.find('img',class_='ty-pict').get('data-ssrc')
-        price = phone.find('span', class_='ty-price-update').text.strip()
-
+        try:
+            title = phone.find('a',class_='product-title').text.strip()
+        except:
+            title =''
+        try:
+            img =phone.find('img',class_='ty-pict').get('data-ssrc')
+        except:
+            img =''
+        try:
+            price = phone.find('span', class_='ty-price-update').text.strip()
+        except:
+            price =''
+            
         list_data.append({
             'title':title,
             'price':price,
@@ -34,11 +43,14 @@ def write_csv(data):
         write =csv.DictWriter(file,delimiter=',',fieldnames=names)
         write.writerows(data)
 def main():
-    html = get_html(URL)
-    soup = get_soup(html)
-    data =get_data(soup)
-    write_csv(data)
-    # print(data)
+    for i in range(1,14):
+        url =BASE_URL + f'page-{i}/'
+        
+        html = get_html(url)
+        soup = get_soup(html)
+        data =get_data(soup)
+        write_csv(data)
+        print(f'Спарсили -{i} страницу')
 if __name__=='__main__':
     main()
 
